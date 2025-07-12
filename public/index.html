@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rehabilitación Trocanteritis</title>
+
+    <!-- PWA Meta Tags -->
+    <meta
+      name="description"
+      content="App de ejercicios de rehabilitación para trocanteritis - Fase 1"
+    />
+    <meta name="theme-color" content="#3b82f6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Rehab Trocanteritis" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="msapplication-TileColor" content="#3b82f6" />
+    <meta name="msapplication-tap-highlight" content="no" />
+
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#3b82f6" />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- React -->
+    <script
+      crossorigin
+      src="https://unpkg.com/react@18/umd/react.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+    ></script>
+
+    <!-- Lucide React -->
+    <script src="https://unpkg.com/lucide-react@latest/dist/lucide-react.umd.js"></script>
+
+    <!-- Babel Standalone -->
+    <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useState } = React;
+      const { CheckCircle, RotateCcw, Clock, Target, Award } = lucideReact;
+
+      const ejercicios = [
+        {
+          nombre: "Puente de glúteo",
+          repeticiones: "3 x 12-15 reps",
+          instrucciones:
+            "Tumbado boca arriba, pies apoyados, eleva la pelvis apretando glúteos.",
+          duracion: "2-3 min",
+          dificultad: "Fácil",
+        },
+        {
+          nombre: "Marcha supina",
+          repeticiones: "2 x 10-12 reps por pierna",
+          instrucciones:
+            "Desde puente de glúteo, eleva una pierna manteniendo pelvis estable.",
+          duracion: "2-3 min",
+          dificultad: "Medio",
+        },
+        {
+          nombre: "Clamshell (con goma si no hay dolor)",
+          repeticiones: "2 x 12 reps por lado",
+          instrucciones:
+            "De lado, rodillas flexionadas, separa rodillas sin mover pelvis.",
+          duracion: "2-3 min",
+          dificultad: "Medio",
+        },
+        {
+          nombre: "Plancha en rodillas",
+          repeticiones: "10-15 seg x 2",
+          instrucciones:
+            "Apoya antebrazos y rodillas, mantén el cuerpo recto desde rodillas hasta cabeza. Activa abdomen y respira normalmente.",
+          duracion: "1-2 min",
+          dificultad: "Medio",
+        },
+        {
+          nombre: "Elevación de talones",
+          repeticiones: "2 x 15 reps",
+          instrucciones: "De pie, sube y baja lentamente sobre puntas de pies.",
+          duracion: "2 min",
+          dificultad: "Fácil",
+        },
+        {
+          nombre: "Respiración diafragmática",
+          repeticiones: "2-3 minutos",
+          instrucciones:
+            "Tumbado, una mano en pecho y otra en abdomen. Respira inflando barriga.",
+          duracion: "3 min",
+          dificultad: "Fácil",
+        },
+      ];
+
+      function App() {
+        const [completado, setCompletado] = useState(
+          Array(ejercicios.length).fill(false)
+        );
+        const [sesionesCompletadas, setSesionesCompletadas] = useState(0);
+        const [tiempoInicio, setTiempoInicio] = useState(null);
+        const [tiempoTranscurrido, setTiempoTranscurrido] = useState(0);
+
+        const toggleEjercicio = (index) => {
+          const nuevoEstado = [...completado];
+          nuevoEstado[index] = !nuevoEstado[index];
+          setCompletado(nuevoEstado);
+
+          // Iniciar contador si es el primer ejercicio
+          if (!tiempoInicio && nuevoEstado[index]) {
+            setTiempoInicio(Date.now());
+          }
+        };
+
+        const progreso =
+          (completado.filter(Boolean).length / ejercicios.length) * 100;
+        const ejerciciosCompletados = completado.filter(Boolean).length;
+
+        const reiniciarSesion = () => {
+          if (progreso === 100) {
+            setSesionesCompletadas((prev) => prev + 1);
+          }
+          setCompletado(Array(ejercicios.length).fill(false));
+          setTiempoInicio(null);
+          setTiempoTranscurrido(0);
+        };
+
+        const getDificultadColor = (dificultad) => {
+          switch (dificultad) {
+            case "Fácil":
+              return "bg-green-100 text-green-800";
+            case "Medio":
+              return "bg-yellow-100 text-yellow-800";
+            case "Difícil":
+              return "bg-red-100 text-red-800";
+            default:
+              return "bg-gray-100 text-gray-800";
+          }
+        };
+
+        return React.createElement(
+          "div",
+          {
+            className:
+              "max-w-4xl mx-auto p-4 bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen",
+          },
+          [
+            // Header
+            React.createElement(
+              "div",
+              {
+                className: "text-center mb-6",
+                key: "header",
+              },
+              [
+                React.createElement(
+                  "h1",
+                  {
+                    className: "text-3xl font-bold text-gray-800 mb-2",
+                    key: "title",
+                  },
+                  "Fase 1 - Trocanteritis"
+                ),
+                React.createElement(
+                  "p",
+                  {
+                    className: "text-gray-600",
+                    key: "subtitle",
+                  },
+                  "Ejercicios de rehabilitación y fortalecimiento"
+                ),
+              ]
+            ),
+
+            // Stats Cards
+            React.createElement(
+              "div",
+              {
+                className: "grid grid-cols-1 md:grid-cols-3 gap-4 mb-6",
+                key: "stats",
+              },
+              [
+                React.createElement(
+                  "div",
+                  {
+                    className: "bg-white rounded-lg p-4 shadow-md",
+                    key: "stat1",
+                  },
+                  [
+                    React.createElement(
+                      "div",
+                      {
+                        className: "flex items-center justify-between",
+                        key: "stat1-content",
+                      },
+                      [
+                        React.createElement("div", { key: "stat1-text" }, [
+                          React.createElement(
+                            "p",
+                            {
+                              className: "text-sm text-gray-500",
+                              key: "stat1-label",
+                            },
+                            "Progreso"
+                          ),
+                          React.createElement(
+                            "p",
+                            {
+                              className: "text-2xl font-bold text-blue-600",
+                              key: "stat1-value",
+                            },
+                            `${Math.round(progreso)}%`
+                          ),
+                        ]),
+                        React.createElement(Target, {
+                          className: "w-8 h-8 text-blue-500",
+                          key: "stat1-icon",
+                        }),
+                      ]
+                    ),
+                  ]
+                ),
+                React.createElement(
+                  "div",
+                  {
+                    className: "bg-white rounded-lg p-4 shadow-md",
+                    key: "stat2",
+                  },
+                  [
+                    React.createElement(
+                      "div",
+                      {
+                        className: "flex items-center justify-between",
+                        key: "stat2-content",
+                      },
+                      [
+                        React.createElement("div", { key: "stat2-text" }, [
+                          React.createElement(
+                            "p",
+                            {
+                              className: "text-sm text-gray-500",
+                              key: "stat2-label",
+                            },
+                            "Completados"
+                          ),
+                          React.createElement(
+                            "p",
+                            {
+                              className: "text-2xl font-bold text-green-600",
+                              key: "stat2-value",
+                            },
+                            `${ejerciciosCompletados}/${ejercicios.length}`
+                          ),
+                        ]),
+                        React.createElement(CheckCircle, {
+                          className: "w-8 h-8 text-green-500",
+                          key: "stat2-icon",
+                        }),
+                      ]
+                    ),
+                  ]
+                ),
+                React.createElement(
+                  "div",
+                  {
+                    className: "bg-white rounded-lg p-4 shadow-md",
+                    key: "stat3",
+                  },
+                  [
+                    React.createElement(
+                      "div",
+                      {
+                        className: "flex items-center justify-between",
+                        key: "stat3-content",
+                      },
+                      [
+                        React.createElement("div", { key: "stat3-text" }, [
+                          React.createElement(
+                            "p",
+                            {
+                              className: "text-sm text-gray-500",
+                              key: "stat3-label",
+                            },
+                            "Sesiones"
+                          ),
+                          React.createElement(
+                            "p",
+                            {
+                              className: "text-2xl font-bold text-purple-600",
+                              key: "stat3-value",
+                            },
+                            sesionesCompletadas
+                          ),
+                        ]),
+                        React.createElement(Award, {
+                          className: "w-8 h-8 text-purple-500",
+                          key: "stat3-icon",
+                        }),
+                      ]
+                    ),
+                  ]
+                ),
+              ]
+            ),
+
+            // Progress Bar
+            React.createElement(
+              "div",
+              {
+                className: "bg-white rounded-lg p-4 shadow-md mb-6",
+                key: "progress",
+              },
+              [
+                React.createElement(
+                  "div",
+                  {
+                    className: "flex justify-between items-center mb-2",
+                    key: "progress-header",
+                  },
+                  [
+                    React.createElement(
+                      "span",
+                      {
+                        className: "text-sm font-medium text-gray-700",
+                        key: "progress-label",
+                      },
+                      "Progreso de la sesión"
+                    ),
+                    React.createElement(
+                      "span",
+                      {
+                        className: "text-sm text-gray-500",
+                        key: "progress-text",
+                      },
+                      `${ejerciciosCompletados} de ${ejercicios.length}`
+                    ),
+                  ]
+                ),
+                React.createElement(
+                  "div",
+                  {
+                    className: "w-full bg-gray-200 rounded-full h-3",
+                    key: "progress-container",
+                  },
+                  [
+                    React.createElement("div", {
+                      className:
+                        "bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-500 ease-out",
+                      style: { width: `${progreso}%` },
+                      key: "progress-bar",
+                    }),
+                  ]
+                ),
+              ]
+            ),
+
+            // Ejercicios
+            React.createElement(
+              "div",
+              {
+                className: "space-y-4 mb-6",
+                key: "ejercicios",
+              },
+              ejercicios.map((ejercicio, index) =>
+                React.createElement(
+                  "div",
+                  {
+                    key: `ejercicio-${index}`,
+                    className: `rounded-lg p-4 shadow-md transition-all duration-300 ${
+                      completado[index]
+                        ? "bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200"
+                        : "bg-white hover:shadow-lg"
+                    }`,
+                  },
+                  [
+                    React.createElement(
+                      "label",
+                      {
+                        className: "flex items-start gap-4 cursor-pointer",
+                        key: `label-${index}`,
+                      },
+                      [
+                        React.createElement(
+                          "div",
+                          {
+                            className: "flex-shrink-0 mt-1",
+                            key: `checkbox-container-${index}`,
+                          },
+                          [
+                            React.createElement("input", {
+                              type: "checkbox",
+                              checked: completado[index],
+                              onChange: () => toggleEjercicio(index),
+                              className:
+                                "w-5 h-5 text-blue-600 rounded focus:ring-blue-500",
+                              key: `checkbox-${index}`,
+                            }),
+                          ]
+                        ),
+                        React.createElement(
+                          "div",
+                          {
+                            className: "flex-1",
+                            key: `content-${index}`,
+                          },
+                          [
+                            React.createElement(
+                              "div",
+                              {
+                                className: "flex items-center gap-2 mb-2",
+                                key: `title-row-${index}`,
+                              },
+                              [
+                                React.createElement(
+                                  "h2",
+                                  {
+                                    className: `text-lg font-semibold ${
+                                      completado[index]
+                                        ? "text-green-800"
+                                        : "text-gray-800"
+                                    }`,
+                                    key: `title-${index}`,
+                                  },
+                                  ejercicio.nombre
+                                ),
+                                React.createElement(
+                                  "span",
+                                  {
+                                    className: `px-2 py-1 text-xs rounded-full ${getDificultadColor(
+                                      ejercicio.dificultad
+                                    )}`,
+                                    key: `difficulty-${index}`,
+                                  },
+                                  ejercicio.dificultad
+                                ),
+                              ]
+                            ),
+                            React.createElement(
+                              "div",
+                              {
+                                className:
+                                  "flex items-center gap-4 mb-2 text-sm text-gray-600",
+                                key: `meta-${index}`,
+                              },
+                              [
+                                React.createElement(
+                                  "span",
+                                  {
+                                    className: "font-medium",
+                                    key: `reps-${index}`,
+                                  },
+                                  ejercicio.repeticiones
+                                ),
+                                React.createElement(
+                                  "span",
+                                  {
+                                    className: "flex items-center gap-1",
+                                    key: `duration-${index}`,
+                                  },
+                                  [
+                                    React.createElement(Clock, {
+                                      className: "w-4 h-4",
+                                      key: `clock-${index}`,
+                                    }),
+                                    ejercicio.duracion,
+                                  ]
+                                ),
+                              ]
+                            ),
+                            React.createElement(
+                              "p",
+                              {
+                                className:
+                                  "text-sm text-gray-700 leading-relaxed",
+                                key: `instructions-${index}`,
+                              },
+                              ejercicio.instrucciones
+                            ),
+                          ]
+                        ),
+                        completado[index] &&
+                          React.createElement(CheckCircle, {
+                            className:
+                              "w-6 h-6 text-green-500 flex-shrink-0 mt-1",
+                            key: `check-${index}`,
+                          }),
+                      ]
+                    ),
+                  ]
+                )
+              )
+            ),
+
+            // Mensaje de felicitación
+            progreso === 100 &&
+              React.createElement(
+                "div",
+                {
+                  className:
+                    "bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg p-6 mb-6 shadow-lg",
+                  key: "completion",
+                },
+                [
+                  React.createElement(
+                    "div",
+                    {
+                      className: "text-center",
+                      key: "completion-content",
+                    },
+                    [
+                      React.createElement(Award, {
+                        className: "w-12 h-12 mx-auto mb-2",
+                        key: "completion-icon",
+                      }),
+                      React.createElement(
+                        "h3",
+                        {
+                          className: "text-xl font-bold mb-2",
+                          key: "completion-title",
+                        },
+                        "¡Sesión Completada!"
+                      ),
+                      React.createElement(
+                        "p",
+                        {
+                          key: "completion-text",
+                        },
+                        "Excelente trabajo. Has completado todos los ejercicios de la Fase 1."
+                      ),
+                    ]
+                  ),
+                ]
+              ),
+
+            // Actions
+            React.createElement(
+              "div",
+              {
+                className: "flex gap-4",
+                key: "actions",
+              },
+              [
+                React.createElement(
+                  "button",
+                  {
+                    onClick: reiniciarSesion,
+                    className:
+                      "flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 flex items-center justify-center gap-2 shadow-md",
+                    key: "reset-button",
+                  },
+                  [
+                    React.createElement(RotateCcw, {
+                      className: "w-5 h-5",
+                      key: "reset-icon",
+                    }),
+                    progreso === 100
+                      ? "Completar y Nueva Sesión"
+                      : "Reiniciar Sesión",
+                  ]
+                ),
+              ]
+            ),
+
+            // Info adicional
+            React.createElement(
+              "div",
+              {
+                className: "mt-6 bg-white rounded-lg p-4 shadow-md",
+                key: "recommendations",
+              },
+              [
+                React.createElement(
+                  "h3",
+                  {
+                    className: "font-semibold text-gray-800 mb-2",
+                    key: "rec-title",
+                  },
+                  "Recomendaciones:"
+                ),
+                React.createElement(
+                  "ul",
+                  {
+                    className: "text-sm text-gray-600 space-y-1",
+                    key: "rec-list",
+                  },
+                  [
+                    React.createElement(
+                      "li",
+                      { key: "rec1" },
+                      "• Realiza estos ejercicios 2-3 veces por semana"
+                    ),
+                    React.createElement(
+                      "li",
+                      { key: "rec2" },
+                      "• Detente si sientes dolor agudo"
+                    ),
+                    React.createElement(
+                      "li",
+                      { key: "rec3" },
+                      "• Mantén una respiración constante durante los ejercicios"
+                    ),
+                    React.createElement(
+                      "li",
+                      { key: "rec4" },
+                      "• Progresa gradualmente en intensidad"
+                    ),
+                  ]
+                ),
+              ]
+            ),
+          ]
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(React.createElement(App));
+    </script>
+
+    <!-- Service Worker Registration -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/sw.js")
+            .then((registration) => {
+              console.log("SW registered: ", registration);
+            })
+            .catch((registrationError) => {
+              console.log("SW registration failed: ", registrationError);
+            });
+        });
+      }
+    </script>
+  </body>
+</html>
